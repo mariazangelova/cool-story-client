@@ -1,6 +1,6 @@
 import { apiUrl } from "../../config/constants";
 import axios from "axios";
-import { selectToken } from "./selectors";
+import { selectToken, selectUserId } from "./selectors";
 import {
   appLoading,
   appDoneLoading,
@@ -35,8 +35,8 @@ export const signUp = (name, email, password) => {
         email,
         password
       });
+      await dispatch(loginSuccess(response.data));
 
-      dispatch(loginSuccess(response.data));
       dispatch(showMessageWithTimeout("success", true, "account created"));
       dispatch(appDoneLoading());
     } catch (error) {
@@ -92,7 +92,6 @@ export const getUserWithStoredToken = () => {
       const response = await axios.get(`${apiUrl}/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
       // token is still valid
       dispatch(tokenStillValid(response.data));
       dispatch(appDoneLoading());

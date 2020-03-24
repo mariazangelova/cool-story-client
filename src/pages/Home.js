@@ -5,11 +5,11 @@ import { getHomepagesThunk } from "../store/home/actions";
 import { selectHomepages } from "../store/home/selectors";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
+import { Link } from "react-router-dom";
 
 export default function Home() {
   const dispatch = useDispatch();
   const homepages = useSelector(selectHomepages);
-  console.log("homepages", homepages);
   useEffect(() => {
     dispatch(getHomepagesThunk());
   }, [dispatch]);
@@ -20,17 +20,22 @@ export default function Home() {
       </Jumbotron>
       {homepages.map(homepage => {
         return (
-          <Container key={homepage.id}>
-            <div
-              style={{
-                color: homepage.color,
-                background: homepage.backgroundColor
-              }}
-            >
-              <h3>{homepage.title}</h3>
-              <Button>Visit page</Button>
-            </div>
-          </Container>
+          <div>
+            <Container>
+              <div
+                key={homepage.id}
+                style={{
+                  color: homepage.color,
+                  background: homepage.backgroundColor
+                }}
+              >
+                <h3>{homepage.title}</h3>
+                <Link to={`/homepages/${homepage.id}`}>
+                  <Button>Visit page</Button>
+                </Link>
+              </div>
+            </Container>
+          </div>
         );
       })}
     </div>
