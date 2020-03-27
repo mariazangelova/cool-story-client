@@ -1,12 +1,14 @@
 import { apiUrl } from "../../config/constants";
 import axios from "axios";
-import { selectToken, selectUserId } from "./selectors";
+import { selectToken, selectUserId, selecHomepageId } from "./selectors";
 import {
   appLoading,
   appDoneLoading,
   showMessageWithTimeout,
   setMessage
 } from "../appState/actions";
+import { selectHomepage } from "../pagedetails/selectors";
+import { getHomepageThunk } from "../pagedetails/actions";
 
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const TOKEN_STILL_VALID = "TOKEN_STILL_VALID";
@@ -105,6 +107,108 @@ export const getUserWithStoredToken = () => {
       // get rid of the token by logging out
       dispatch(logOut());
       dispatch(appDoneLoading());
+    }
+  };
+};
+
+const newStory = story => ({
+  type: "NEW_STORY",
+  payload: {
+    story
+  }
+});
+
+export const postStory = (name, content, imageUrl) => {
+  return async (dispatch, getState) => {
+    const token = selectToken(getState());
+    const homepageId = selecHomepageId(getState());
+    //console.log("homepageid", homepageId);
+    const story = await axios.post(
+      `${apiUrl}/stories`,
+      {
+        name,
+        content,
+        imageUrl,
+        homepageId
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+    console.log("story", story);
+    await dispatch(newStory(story.data));
+  };
+};
+
+const edits = page => ({
+  type: "PAGE_EDITED",
+  payload: { page }
+});
+
+export const editPage = (title, description, color, backgroundColor) => {
+  return async (dispatch, getState) => {
+    const homepageId = selecHomepageId(getState());
+    const token = selectToken(getState());
+
+    const edit = await axios.put(
+      `${apiUrl}/homepages/:homepageId`,
+      { title, description, color, backgroundColor, homepageId },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+    //console.log("edit", edit);
+    await dispatch(edits(edit.data));
+  };
+};
+// const newLike = like => ({
+//   type: "STORY_LIKED",
+//   payload: { like }
+// });
+
+export const likeStory = storyId => {
+  return async (dispatch, getState) => {
+    //dispatch(appLoading());
+    const token = selectToken(getState());
+    const homepage = selectHomepage(getState());
+    const homepageId = homepage.id;
+
+    const like = await axios.post(
+      `${apiUrl}/homepages/stories/${storyId}/like`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+    dispatch(getHomepageThunk(homepageId));
+    //dispatch(appDoneLoading());
+  };
+};
+
+export const storyDeleted = storyId => ({
+  type: "STORY_DELETED",
+  payload: storyId
+});
+export const deleteStory = storyId => {
+  return async (dispatch, getState) => {
+    dispatch(appLoading());
+    const token = selectToken(getState());
+    const homepage = selectHomepage(getState());
+    const homepageId = homepage.id;
+    try {
+      const deleted = await axios.delete(
+        `${apiUrl}/homepages/${homepageId}/stories/${storyId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        },
+        {}
+      );
+      console.log("deleted?", deleted.data);
+      dispatch(storyDeleted(storyId));
+      dispatch(getHomepageThunk(homepageId));
+      dispatch(appDoneLoading());
+    } catch (e) {
+      console.error(e);
     }
   };
 };

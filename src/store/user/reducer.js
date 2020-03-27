@@ -19,6 +19,46 @@ export default (state = initialState, action) => {
     case TOKEN_STILL_VALID:
       return { ...state, ...action.payload };
 
+    case "NEW_STORY":
+      return {
+        ...state,
+        homepage: {
+          ...state.homepage,
+          stories: state.homepage.stories
+            ? [...state.homepage.stories, action.payload.story]
+            : [action.payload.story]
+        }
+      };
+    case "PAGE_EDITED":
+      return {
+        ...state,
+        homepage: {
+          ...action.payload.page,
+          stories: state.homepage.stories
+        }
+      };
+
+    case "STORY_LIKED":
+      return {
+        ...state,
+        homepage: {
+          ...state.homepage,
+          stories: [...state.homepage.stories, action.payload.story]
+        }
+      };
+    case "STORY_DELETED":
+      const storyId = action.payload;
+      const filteredStories = state.homepage.stories.filter(
+        story => story.id !== storyId
+      );
+      return {
+        ...state,
+        homepage: {
+          ...state.homepage,
+          stories: filteredStories
+        }
+      };
+
     default:
       return state;
   }

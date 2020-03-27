@@ -20,22 +20,21 @@ export default function Home() {
       </Jumbotron>
       {homepages.map(homepage => {
         return (
-          <div>
-            <Container>
-              <div
-                key={homepage.id}
-                style={{
-                  color: homepage.color,
-                  background: homepage.backgroundColor
-                }}
-              >
-                <h3>{homepage.title}</h3>
-                <Link to={`/homepages/${homepage.id}`}>
-                  <Button>Visit page</Button>
-                </Link>
-              </div>
-            </Container>
-          </div>
+          <Container>
+            <div
+              key={homepage.id}
+              // style={{
+              //   color: homepage.color,
+              //   background: homepage.backgroundColor
+              // }}
+            >
+              <h3>{homepage.title}</h3>
+            </div>
+
+            <Link to={`/homepages/${homepage.id}`}>
+              <Button variant="light">Visit page</Button>
+            </Link>
+          </Container>
         );
       })}
     </div>
